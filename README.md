@@ -10,4 +10,4 @@ postman collection using graphql
 Assuming that you already install `newman` to your machine
 
 run using below command :
-`newman run collection/Rick\ \&\ Morty.postman_collection.json --folder 2\ \-\ \Sequence\ \API`
+`newman run collection/Rick_n_Morty.postman_collection.json --folder 2\ \-\ \Sequence\ \API`
