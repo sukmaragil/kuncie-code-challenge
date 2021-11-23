@@ -1,0 +1,336 @@
+{
+	"info": {
+		"_postman_id": "bf30c7e2-8556-4940-991d-968c095b9037",
+		"name": "Rick & Morty",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1 - Query data",
+			"item": [
+				{
+					"name": "List of characters - female",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\n  characters(filter: { gender: \"Female\", status: \"Alive\", species: \"Human\" }) {\n    info {\n      count\n    }\n    results {\n      id\n      name\n      status\n      species\n      gender\n    }\n  }\n}",
+								"variables": "{\n    \"page\": 1,\n    \"name\": \"Rick\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://rickandmortyapi.com/graphql",
+							"protocol": "https",
+							"host": [
+								"rickandmortyapi",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List of characters - female with variable",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query listCharacters( $gender: String, $status: String, $species: String) {\n  characters(filter: { gender: $gender, status: $status, species: $species}) {\n    info {\n      count\n    }\n    results {\n      id\n      name\n      status\n      species\n      gender\n    }\n  }\n}",
+								"variables": "{\n    \"gender\" : \"Female\",\n    \"status\" : \"Alive\",\n    \"species\" : \"Human\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://rickandmortyapi.com/graphql",
+							"protocol": "https",
+							"host": [
+								"rickandmortyapi",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2 - Sequence API",
+			"item": [
+				{
+					"name": "List characters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code != 200) {",
+									"    pm.expect.fail('Got ' + pm.response.code + ': Please check your service or request and response');",
+									"    return;",
+									"}",
+									"",
+									"const respData = pm.response.json();",
+									"",
+									"// Check request return status code 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Character query by name is present\", () => {",
+									"    // Check data not empty",
+									"    pm.expect(respData.data.characters.results).is.not.null;",
+									"    ",
+									"    // Check result name is the same",
+									"    pm.expect(respData.data.characters.results[0].name)",
+									"        .to.be.equal(pm.collectionVariables.get(\"name\"));",
+									"",
+									"})",
+									"",
+									"// Save location information",
+									"pm.collectionVariables.set(\"location_id\", respData.data.characters.results[0].location.id);",
+									"pm.collectionVariables.set(\"location_name\", respData.data.characters.results[0].location.name);",
+									"pm.collectionVariables.set(\"location_type\", respData.data.characters.results[0].location.type);",
+									"pm.collectionVariables.set(\"location_dimension\", respData.data.characters.results[0].location.dimension);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Change below data to modify query",
+									"pm.collectionVariables.set(\"name\", \"Shmlangela Shmlobinson-Shmlower\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query listCharacters( $name: String) {\n  characters(filter: { name: $name}) {\n    info {\n      count\n    }\n    results {\n      id\n      name\n      status\n      species\n      location {\n          id\n          name\n          type\n          dimension\n      }\n    }\n  }\n}",
+								"variables": "{\n    \"name\" : \"{{name}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://rickandmortyapi.com/graphql",
+							"protocol": "https",
+							"host": [
+								"rickandmortyapi",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location by Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code != 200) {",
+									"    pm.test(\"Test failed\", function() {",
+									"        pm.expect.fail('Got ' + pm.response.code + ': Please check your service or request and response');",
+									"    })",
+									"    return;",
+									"}",
+									"",
+									"const respData = pm.response.json();",
+									"",
+									"// Check request return status code 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Location info is correct\", () => {",
+									"    // Check data not empty",
+									"    pm.expect(respData.data.location).is.not.null;",
+									"    ",
+									"    // Check location name is the same",
+									"    pm.expect(respData.data.location.name)",
+									"        .to.be.equal(pm.collectionVariables.get(\"location_name\"));",
+									"    ",
+									"    // Check location type is the same ",
+									"    pm.expect(respData.data.location.type)",
+									"        .to.be.equal(pm.collectionVariables.get(\"location_type\"));",
+									"",
+									"    // Check location dimension is the same",
+									"    pm.expect(respData.data.location.dimension)",
+									"        .to.be.equal(pm.collectionVariables.get(\"location_dimension\"));",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query searchLocation($id: ID!){\n    location(id: $id) {\n      id\n      name\n      dimension\n      created\n  }\n}",
+								"variables": "{\n    \"id\": {{location_id}}\n}"
+							}
+						},
+						"url": {
+							"raw": "https://rickandmortyapi.com/graphql",
+							"protocol": "https",
+							"host": [
+								"rickandmortyapi",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List episodes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code != 200) {",
+									"    pm.test(\"Test failed\", function() {",
+									"        pm.expect.fail('Got ' + pm.response.code + ': Please check your service or request and response');",
+									"    })",
+									"    return;",
+									"}",
+									"",
+									"const respData = pm.response.json();",
+									"",
+									"// Check request return status code 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Location info is correct\", () => {",
+									"    // Check data not empty",
+									"    pm.expect(respData.data.location).is.not.null;",
+									"    ",
+									"    // Check location name is the same",
+									"    pm.expect(respData.data.location.name)",
+									"        .to.be.equal(pm.collectionVariables.get(\"location_name\"));",
+									"    ",
+									"    // Check location type is the same ",
+									"    pm.expect(respData.data.location.type)",
+									"        .to.be.equal(pm.collectionVariables.get(\"location_type\"));",
+									"",
+									"    // Check location dimension is the same",
+									"    pm.expect(respData.data.location.dimension)",
+									"        .to.be.equal(pm.collectionVariables.get(\"location_dimension\"));",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query searchLocation($id: ID!){\n    location(id: $id) {\n      id\n      name\n      dimension\n      created\n  }\n}",
+								"variables": "{\n    \"id\": {{location_id}}\n}"
+							}
+						},
+						"url": {
+							"raw": "https://rickandmortyapi.com/graphql",
+							"protocol": "https",
+							"host": [
+								"rickandmortyapi",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "name",
+			"value": ""
+		},
+		{
+			"key": "location_id",
+			"value": ""
+		},
+		{
+			"key": "location_name",
+			"value": ""
+		},
+		{
+			"key": "location_type",
+			"value": ""
+		},
+		{
+			"key": "location_dimension",
+			"value": ""
+		}
+	]
+}
