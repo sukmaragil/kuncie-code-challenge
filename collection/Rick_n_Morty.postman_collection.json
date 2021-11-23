@@ -98,7 +98,13 @@
 									"pm.collectionVariables.set(\"location_id\", respData.data.characters.results[0].location.id);",
 									"pm.collectionVariables.set(\"location_name\", respData.data.characters.results[0].location.name);",
 									"pm.collectionVariables.set(\"location_type\", respData.data.characters.results[0].location.type);",
-									"pm.collectionVariables.set(\"location_dimension\", respData.data.characters.results[0].location.dimension);"
+									"pm.collectionVariables.set(\"location_dimension\", respData.data.characters.results[0].location.dimension);",
+									"",
+									"// Save episode information",
+									"pm.collectionVariables.set(\"episode_id\", respData.data.characters.results[0].episode[0].id);",
+									"pm.collectionVariables.set(\"episode_name\", respData.data.characters.results[0].episode[0].name);",
+									"pm.collectionVariables.set(\"episode_air_date\", respData.data.characters.results[0].episode[0].air_date);",
+									"pm.collectionVariables.set(\"episode_code\", respData.data.characters.results[0].episode[0].episode);"
 								],
 								"type": "text/javascript"
 							}
@@ -120,7 +126,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query listCharacters( $name: String) {\n  characters(filter: { name: $name}) {\n    info {\n      count\n    }\n    results {\n      id\n      name\n      status\n      species\n      location {\n          id\n          name\n          type\n          dimension\n      }\n    }\n  }\n}",
+								"query": "query listCharacters( $name: String) {\n  characters(filter: { name: $name}) {\n    info {\n      count\n    }\n    results {\n      id\n      name\n      status\n      species\n      location {\n          id\n          name\n          type\n          dimension\n      }\n      episode {\n          id\n          name\n          air_date\n          episode\n      }\n    }\n  }\n}",
 								"variables": "{\n    \"name\" : \"{{name}}\"\n}"
 							}
 						},
@@ -195,7 +201,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query searchLocation($id: ID!){\n    location(id: $id) {\n      id\n      name\n      dimension\n      created\n  }\n}",
+								"query": "query searchLocation($id: ID!){\n    location(id: $id) {\n      id\n      name\n      type\n      dimension\n      created\n  }\n}",
 								"variables": "{\n    \"id\": {{location_id}}\n}"
 							}
 						},
@@ -214,7 +220,7 @@
 					"response": []
 				},
 				{
-					"name": "List episodes",
+					"name": "Episodes by Id",
 					"event": [
 						{
 							"listen": "test",
@@ -230,25 +236,29 @@
 									"const respData = pm.response.json();",
 									"",
 									"// Check request return status code 200",
-									"pm.test(\"Status code is 200\", function () {",
+									"pm.test(\"Status code is 200\", function() {",
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test(\"Location info is correct\", () => {",
+									"pm.test(\"Episode info is correct\", () => {",
 									"    // Check data not empty",
 									"    pm.expect(respData.data.location).is.not.null;",
 									"    ",
-									"    // Check location name is the same",
-									"    pm.expect(respData.data.location.name)",
-									"        .to.be.equal(pm.collectionVariables.get(\"location_name\"));",
+									"    // Check episode name is the same",
+									"    pm.expect(respData.data.episode.name).to.be.equal(pm.collectionVariables.get(\"episode_name\"));",
 									"    ",
-									"    // Check location type is the same ",
-									"    pm.expect(respData.data.location.type)",
-									"        .to.be.equal(pm.collectionVariables.get(\"location_type\"));",
+									"    // Check episode air date is the same ",
+									"    pm.expect(respData.data.episode.air_date).to.be.equal(pm.collectionVariables.get(\"episode_air_date\"));",
 									"",
-									"    // Check location dimension is the same",
-									"    pm.expect(respData.data.location.dimension)",
-									"        .to.be.equal(pm.collectionVariables.get(\"location_dimension\"));",
+									"    // Check episode number is the same",
+									"    pm.expect(respData.data.episode.episode).to.be.equal",
+									"})",
+									"",
+									"pm.test(\"Characters appears in the episode\", function() {",
+									"    const listCharacter = respData.data.episode.characters;",
+									"    const character = listCharacter.find(element => element.name === pm.collectionVariables.get(\"name\"));",
+									"",
+									"    pm.expect(character.name).to.be.equal(pm.collectionVariables.get(\"name\"));",
 									"})"
 								],
 								"type": "text/javascript"
@@ -270,8 +280,8 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query searchLocation($id: ID!){\n    location(id: $id) {\n      id\n      name\n      dimension\n      created\n  }\n}",
-								"variables": "{\n    \"id\": {{location_id}}\n}"
+								"query": "query searchEpisode($id: ID!){\n    episode(id: $id) {\n      id\n      name\n      air_date\n      episode\n      characters {\n          id\n          name\n          gender\n          status\n          species\n      }\n  }\n}",
+								"variables": "{\n    \"id\": {{episode_id}}\n}"
 							}
 						},
 						"url": {
@@ -330,6 +340,22 @@
 		},
 		{
 			"key": "location_dimension",
+			"value": ""
+		},
+		{
+			"key": "episode_id",
+			"value": ""
+		},
+		{
+			"key": "episode_name",
+			"value": ""
+		},
+		{
+			"key": "episode_air_date",
+			"value": ""
+		},
+		{
+			"key": "episode_code",
 			"value": ""
 		}
 	]
